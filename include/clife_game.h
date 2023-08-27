@@ -16,7 +16,7 @@ typedef struct {
     uint16_t rule_b;
     uint16_t rule_s;
     bool is_stable;
-    uint16_t *lookup_table_;
+    bool *lookup_table_;
 } clife_t;
 
 typedef struct {
@@ -26,6 +26,11 @@ typedef struct {
 } clife_point_state;
 
 typedef enum {OK, BUFF_SHORT, ERR} update_status;
+
+/*
+ * Macros
+ */
+#define clife_set_def_rule(x) clife_set_rule(x, 8, 12)
 
 /*
  * Function definitions
@@ -53,7 +58,24 @@ clife_t *new_clife(uint32_t width, uint32_t height);
 void delete_clife(clife_t *life);
 
 /* General */
-void clife_set_rule(clife_t *life, uint16_t rule_b, uint16_t rule_s);
+
+/**
+ * Set a basic rule for game of life.
+ *
+ * Set's a rule in form of BX/SY where X and Y are encoded to rule_b and rule_s
+ * in following way: if rule R includes positive integer Z then Z-th bit of R
+ * is set. E.g. the cannonical rule of B3/S23 is encoded as:
+ * rule_b = 2^3 = 8; rule_s = 2^2 + 2^3 = 12.
+ *
+ * @param[in] life pointer to the life object
+ * @param[in] rule_b unsigned integer representing "born" rule in such a way
+ * that if n-th bit is set then n alive neighbours set the cell alive - if 
+ * dead.
+ * @param[in] rule_s unsigned integer representing "survive" rule in such a way
+ * that if n-th bit is set then n alive neighbours keep the cell alive - if 
+ * already alive.
+ */
+bool clife_set_rule(clife_t *life, uint16_t rule_b, uint16_t rule_s);
 void clife_step(clife_t *life);
 update_status clife_step_get_updates(
     clife_t *life,
