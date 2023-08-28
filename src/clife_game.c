@@ -75,6 +75,17 @@ bool clife_set_rule(clife_t *life, uint16_t rule_b, uint16_t rule_s) {
     }
 } /* End clife_set_rule */
 
+/* Cells */
+bool clife_get_cell(clife_t *life, uint32_t x, uint32_t y) {
+    size_t offset = x + life->width * y;
+    return *(life->board_ + offset);
+} /* End clife_get_cell */
+
+void clife_set_cell(clife_t *life, uint32_t x, uint32_t y, bool state) {
+    size_t offset = x + life->width * y;
+    *(life->board_ + offset) = state;
+} /* End clife_set_cell */
+
 /*
  * Internal functions
  */

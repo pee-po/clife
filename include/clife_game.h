@@ -85,7 +85,21 @@ update_status clife_step_get_updates(
 );
 
 /* Cells */
+/**
+ * Get cell's state.
+ *
+ * @param[in] x cell's column
+ * @param[in] y cell's row
+ * @param[out] state cell's state
+ */
 bool clife_get_cell(clife_t *life, uint32_t x, uint32_t y);
+/**
+ * Set cell's state.
+ *
+ * @param[in] x cell's column
+ * @param[in] y cell's row
+ * @param[in] state cell's new state
+ */
 void clife_set_cell(clife_t *life, uint32_t x, uint32_t y, bool state);
 
 #endif /* _clife_game_h_include_ */
