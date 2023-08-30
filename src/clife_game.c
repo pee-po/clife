@@ -40,6 +40,11 @@ clife_t *new_clife(uint32_t width, uint32_t height) {
         return NULL;
     }
 
+    for (size_t i = 0; i < cell_cnt; i++) {
+        board[i] = false;
+        board_sec[i] = false;
+    }
+
     /* Construct struct */
     life->board_ = board;
     life->board_next_ = board_sec;
