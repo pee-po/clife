@@ -76,6 +76,11 @@ void delete_clife(clife_t *life);
  * already alive.
  */
 bool clife_set_rule(clife_t *life, uint16_t rule_b, uint16_t rule_s);
+/**
+ * Perform step calculations
+ *
+ * @param[in] life pointer to the life object
+ */
 void clife_step(clife_t *life);
 update_status clife_step_get_updates(
     clife_t *life,

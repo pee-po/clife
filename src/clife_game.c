@@ -16,6 +16,20 @@
  * @param[in] life pointer to the life object.
  */
 bool *generate_lookup_table(clife_t *life);
+/**
+ * Get neighbours of a given cell
+ *
+ * Returns neighbourhood state, where LSB is the state is top-left neighbour
+ * of cell given by (col, row) (alize == true); next bit is the state of
+ * top nwighbour, and so on (row by row).
+ *
+ * @param[in] life pointer to the life object.
+ * @param[in] col horizontal position of the cell central to the
+ * neighbourhood to be calculated.
+ * @param[in] row vertical position of the cell central to the
+ * neighbourhood to be calculated.
+ */
+uint16_t get_neighbours(clife_t *life, uint32_t col, uint32_t row);
 
 /*
  * Exported functions
@@ -80,6 +94,24 @@ bool clife_set_rule(clife_t *life, uint16_t rule_b, uint16_t rule_s) {
     }
 } /* End clife_set_rule */
 
+void clife_step(clife_t *life) {
+    uint16_t neighbourhood_state;
+    size_t cell_offset;
+    bool state;
+    for (uint32_t row = 0; row < life->height; row++) {
+        for (uint32_t col = 0; col < life->width; col++) {
+            neighbourhood_state = get_neighbours(life, col, row);
+            cell_offset = col + row*life->width;
+            state = *(life->lookup_table_ + neighbourhood_state);
+            *(life->board_next_ + cell_offset) = state;
+        }
+    }
+    bool *temp_board;
+    temp_board = life->board_;
+    life->board_ = life->board_next_;
+    life->board_next_ = temp_board;
+} /* End clife_step */
+
 /* Cells */
 bool clife_get_cell(clife_t *life, uint32_t x, uint32_t y) {
     size_t offset = x + life->width * y;
@@ -133,4 +165,32 @@ bool *generate_lookup_table(clife_t *life) {
     }
     return table;
 } /* End generate_lookup_table */
+
+uint16_t get_neighbours(clife_t *life, uint32_t col, uint32_t row) {
+    int16_t col_offset, row_offset;
+    const uint32_t min_col = 0;
+    const uint32_t max_col = life->width - 1;
+    const uint32_t min_row = 0;
+    const uint32_t max_row = life->height - 1;
+    uint16_t neighbourhood = 0;
+    size_t offset;
+
+    for (uint16_t i = 0; i < 9; i++) {
+        col_offset = i % 3 - 1;
+        row_offset = i / 3 - 1;
+
+        if (
+            (col > min_col || col_offset >= 0)
+            && (col < max_col || col_offset <= 0)
+            && (row > min_row || row_offset >= 0)
+            && (row < max_row || row_offset <= 0)
+        ) {
+            offset = col + col_offset + (row + row_offset)*life->width;
+            if (*(life->board_ + offset)) {
+                neighbourhood = neighbourhood | 1<<i;
+            }
+        }
+    }
+    return neighbourhood;
+} /* End get_neighbours */
 
