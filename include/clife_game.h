@@ -107,5 +107,37 @@ bool clife_get_cell(clife_t *life, uint32_t x, uint32_t y);
  */
 void clife_set_cell(clife_t *life, uint32_t x, uint32_t y, bool state);
 
+/* Serialisation */
+/**
+ * Serilise life object to a bytestream.
+ *
+ * Transcribes only cell states in a reversible way, that is - given other
+ * members of life object are known, the resulting bytestream identifies
+ * the board state uniquely. A reverse operation is clife_deserialise.
+ *
+ * @param[in] life pointer to the life object
+ * @param[in] buffer an allocated char buffer. Ownership of the buffer remains
+ * with the caller
+ * @param[in] buff_len length of buffer
+ * @param[out] size number of bytes written to the buffer. A value of 0
+ * indicates that the size of buffer was insufficient.
+ */
+size_t clife_serialise(clife_t *life, char *buffer, size_t buff_len);
+/**
+ * Deserialise bytestream into life object.
+ *
+ * Sets cell states according to the information in bytestream.
+ * A reverse operation is clife_serialise.
+ *
+ * @param[in] life pointer to the life object
+ * @param[in] buffer an char buffer (read only)
+ * @param[in] buff_len length of buffer
+ * @param[out] bytes_processed number of bytes processed. Generally a
+ * successful operation will have bytes_processed == buff_len. But this doesn't
+ * safeguard against a situation where the buffer is to small compared to the
+ * board and therfore not all cells are set.
+ */
+size_t clife_deserialise(clife_t *life, char *buffer, size_t buff_len);
+
 #endif /* _clife_game_h_include_ */
 

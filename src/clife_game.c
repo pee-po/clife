@@ -123,6 +123,70 @@ void clife_set_cell(clife_t *life, uint32_t x, uint32_t y, bool state) {
     *(life->board_ + offset) = state;
 } /* End clife_set_cell */
 
+/* Serialisation */
+size_t clife_serialise(clife_t *life, char *buffer, size_t buff_len) {
+    uint32_t max_col = life->width - 1;
+    size_t copied_cnt = 0;
+    bool state;
+
+    char cycler = 7;
+    char acc = 0;
+    for (uint32_t row = 0; row < life->height; row++) {
+        for (uint32_t col = 0; col <= max_col; col++) {
+            if (copied_cnt >= buff_len) return 0;
+            /*
+             * Uses only an exported function to access cell state.
+             * This is slow but decouples this function from board
+             * implementation.
+             */
+            state = clife_get_cell(life, col, row);
+            if (state) acc = acc | (1<<cycler);
+            if (cycler == 0 || col == max_col) {
+                *buffer = acc;
+                buffer++;
+                acc = 0;
+                cycler = 7;
+                copied_cnt++;
+            } else {
+                cycler--;
+            }
+        }
+    }
+    return copied_cnt;
+} /* End clife_serialise */
+
+size_t clife_deserialise(clife_t *life, char *buffer, size_t buff_len) {
+    size_t bytes_processed = 0;
+    uint32_t col = 0;
+    uint32_t row = 0;
+    bool state;
+
+    while (buff_len) {
+        for (char i = 7; i >= 0; i--) {
+            state = *buffer & (1<<i);
+            /*
+             * Uses only an exported function to access cell state.
+             * This is slow but decouples this function from board
+             * implementation.
+             */
+            clife_set_cell(life, col, row, state);
+            col++;
+            if (col > life->width) {
+                col = 0;
+                row++;
+                if (row > life->height) {
+                    return bytes_processed;
+                }
+                break;
+            }
+        }
+        buffer++;
+        bytes_processed++;
+        buff_len--;
+    }
+    return bytes_processed;
+} /* End clife_deserialise */
+
 /*
  * Internal functions
  */
