@@ -15,7 +15,6 @@ typedef struct {
     uint32_t height;
     uint16_t rule_b;
     uint16_t rule_s;
-    bool is_stable;
     bool *lookup_table_;
 } clife_t;
 
@@ -37,7 +36,6 @@ typedef enum {OK, BUFF_SHORT, ERR} update_status;
  */
 
 /* Memory */
-
 /**
  * Construct game of life's object with reasonable defaults.
  *
@@ -57,8 +55,8 @@ clife_t *new_clife(uint32_t width, uint32_t height);
  */
 void delete_clife(clife_t *life);
 
-/* General */
 
+/* General */
 /**
  * Set a basic rule for game of life.
  *
@@ -76,18 +74,21 @@ void delete_clife(clife_t *life);
  * already alive.
  */
 bool clife_set_rule(clife_t *life, uint16_t rule_b, uint16_t rule_s);
+
 /**
  * Perform step calculations
  *
  * @param[in] life pointer to the life object
  */
 void clife_step(clife_t *life);
+
 update_status clife_step_get_updates(
     clife_t *life,
     clife_point_state *state_buff,
     uint64_t buff_len,
     uint64_t *update_len
 );
+
 
 /* Cells */
 /**
@@ -98,6 +99,7 @@ update_status clife_step_get_updates(
  * @param[out] state cell's state
  */
 bool clife_get_cell(clife_t *life, uint32_t x, uint32_t y);
+
 /**
  * Set cell's state.
  *
@@ -106,6 +108,7 @@ bool clife_get_cell(clife_t *life, uint32_t x, uint32_t y);
  * @param[in] state cell's new state
  */
 void clife_set_cell(clife_t *life, uint32_t x, uint32_t y, bool state);
+
 
 /* Serialisation */
 /**
@@ -123,6 +126,7 @@ void clife_set_cell(clife_t *life, uint32_t x, uint32_t y, bool state);
  * indicates that the size of buffer was insufficient.
  */
 size_t clife_serialise(clife_t *life, char *buffer, size_t buff_len);
+
 /**
  * Deserialise bytestream into life object.
  *

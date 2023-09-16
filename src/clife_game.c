@@ -16,6 +16,7 @@
  * @param[in] life pointer to the life object.
  */
 bool *generate_lookup_table(clife_t *life);
+
 /**
  * Get neighbours of a given cell
  *
@@ -30,6 +31,7 @@ bool *generate_lookup_table(clife_t *life);
  * neighbourhood to be calculated.
  */
 uint16_t get_neighbours(clife_t *life, uint32_t col, uint32_t row);
+
 
 /*
  * Exported functions
@@ -66,7 +68,6 @@ clife_t *new_clife(uint32_t width, uint32_t height) {
     life->height = height;
     life->rule_b = 0;
     life->rule_s = 0;
-    life->is_stable = false;
     life->lookup_table_ = NULL;
     
     return life;
@@ -112,6 +113,7 @@ void clife_step(clife_t *life) {
     life->board_next_ = temp_board;
 } /* End clife_step */
 
+
 /* Cells */
 bool clife_get_cell(clife_t *life, uint32_t x, uint32_t y) {
     size_t offset = x + life->width * y;
@@ -122,6 +124,7 @@ void clife_set_cell(clife_t *life, uint32_t x, uint32_t y, bool state) {
     size_t offset = x + life->width * y;
     *(life->board_ + offset) = state;
 } /* End clife_set_cell */
+
 
 /* Serialisation */
 size_t clife_serialise(clife_t *life, char *buffer, size_t buff_len) {
@@ -163,7 +166,8 @@ size_t clife_deserialise(clife_t *life, char *buffer, size_t buff_len) {
 
     while (buff_len) {
         for (char i = 7; i >= 0; i--) {
-            state = *buffer & (1<<i);
+            /* ternary expresion is to keep bools clean */
+            state = *buffer & (1<<i) ? true : false;
             /*
              * Uses only an exported function to access cell state.
              * This is slow but decouples this function from board
@@ -186,6 +190,7 @@ size_t clife_deserialise(clife_t *life, char *buffer, size_t buff_len) {
     }
     return bytes_processed;
 } /* End clife_deserialise */
+
 
 /*
  * Internal functions
