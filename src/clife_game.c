@@ -1,5 +1,15 @@
 #include "clife_game.h"
 
+struct clife_s {
+    bool *board;
+    bool *board_next;
+    uint32_t width;
+    uint32_t height;
+    uint16_t rule_b;
+    uint16_t rule_s;
+    bool *lookup_table;
+};
+
 /*
  * Declaration of internal functions
  */
@@ -62,38 +72,25 @@ clife_t *new_clife(uint32_t width, uint32_t height) {
     }
 
     /* Construct struct */
-    life->board_ = board;
-    life->board_next_ = board_sec;
+    life->board = board;
+    life->board_next = board_sec;
     life->width = width;
     life->height = height;
     life->rule_b = 0;
     life->rule_s = 0;
-    life->lookup_table_ = NULL;
+    life->lookup_table = NULL;
     
     return life;
 } /* End new_clife */
 
 void delete_clife(clife_t *life) {
     if (life != NULL) {
-        free(life->board_);
-        free(life->board_next_);
-        free(life->lookup_table_);
+        free(life->board);
+        free(life->board_next);
+        free(life->lookup_table);
     }
     free(life);
 } /* End delete_clife */
-
-bool clife_set_rule(clife_t *life, uint16_t rule_b, uint16_t rule_s) {
-    life->rule_b = rule_b;
-    life->rule_s = rule_s;
-    bool *lookup_table = generate_lookup_table(life);
-    if (lookup_table == NULL) {
-        return false;
-    } else {
-        free(life->lookup_table_);
-        life->lookup_table_ = lookup_table;
-        return true;
-    }
-} /* End clife_set_rule */
 
 void clife_step(clife_t *life) {
     uint16_t neighbourhood_state;
@@ -103,27 +100,48 @@ void clife_step(clife_t *life) {
         for (uint32_t col = 0; col < life->width; col++) {
             neighbourhood_state = get_neighbours(life, col, row);
             cell_offset = col + row*life->width;
-            state = *(life->lookup_table_ + neighbourhood_state);
-            *(life->board_next_ + cell_offset) = state;
+            state = *(life->lookup_table + neighbourhood_state);
+            *(life->board_next + cell_offset) = state;
         }
     }
     bool *temp_board;
-    temp_board = life->board_;
-    life->board_ = life->board_next_;
-    life->board_next_ = temp_board;
+    temp_board = life->board;
+    life->board = life->board_next;
+    life->board_next = temp_board;
 } /* End clife_step */
 
 
-/* Cells */
+/* Getters and setters */
+uint32_t clife_get_width(clife_t *life) {
+    return life->width;
+} /* End clife_get_width */
+
+uint32_t clife_get_height(clife_t *life) {
+    return life->height;
+} /* End clife_get_height */
+
 bool clife_get_cell(clife_t *life, uint32_t x, uint32_t y) {
     size_t offset = x + life->width * y;
-    return *(life->board_ + offset);
+    return *(life->board + offset);
 } /* End clife_get_cell */
 
 void clife_set_cell(clife_t *life, uint32_t x, uint32_t y, bool state) {
     size_t offset = x + life->width * y;
-    *(life->board_ + offset) = state;
+    *(life->board + offset) = state;
 } /* End clife_set_cell */
+
+bool clife_set_rule(clife_t *life, uint16_t rule_b, uint16_t rule_s) {
+    life->rule_b = rule_b;
+    life->rule_s = rule_s;
+    bool *lookup_table = generate_lookup_table(life);
+    if (lookup_table == NULL) {
+        return false;
+    } else {
+        free(life->lookup_table);
+        life->lookup_table = lookup_table;
+        return true;
+    }
+} /* End clife_set_rule */
 
 
 /* Serialisation */
@@ -255,7 +273,7 @@ uint16_t get_neighbours(clife_t *life, uint32_t col, uint32_t row) {
             && (row < max_row || row_offset <= 0)
         ) {
             offset = col + col_offset + (row + row_offset)*life->width;
-            if (*(life->board_ + offset)) {
+            if (*(life->board + offset)) {
                 neighbourhood = neighbourhood | 1<<i;
             }
         }
