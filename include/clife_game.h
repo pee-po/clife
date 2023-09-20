@@ -56,6 +56,31 @@ void delete_clife(clife_t *life);
  */
 void clife_step(clife_t *life);
 
+/**
+ * Perform step calculations and fill a buffer with cell status updates.
+ *
+ * As opposed to clife_step - it doesn't use the secondary board
+ * (internal) representation. The cells that need to be updated are filled into
+ * state_buff (which has to be pre-allocated). If the state_buff is filled
+ * correctly, then the updates are applied to the internal board
+ * representation. If the buffer is NULL or is shorter than the update
+ * then BUFF_SHORT is returned and the updates are NOT applied to the board.
+ * *update_len starts at 0. The state updates are placed into the buffer
+ * starting at index = 0. Each time this is done, *update_len is incremented.
+ * At the end *update_len is the number of cell state
+ * updates reliably recorded into the buffer. The actual number of elements in
+ * buffer that were modified may differ - caller should rely only on elements
+ * of buffer indexed by a number smaller than *update_len.
+ *
+ * @param[in] life pointer to the life object
+ * @param[in] state_buff status update buffer
+ * (the ownership remains with the caller)
+ * @param[in] buff_len buffer size (number of records)
+ * @param[in] update_len pointer to a variable that will be set
+ * to the number of records in buffer that have been modified.
+ * (the ownership remains with the caller)
+ * @param[out] update_status 
+ */
 update_status clife_step_get_updates(
     clife_t *life,
     clife_point_state *state_buff,

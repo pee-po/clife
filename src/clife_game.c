@@ -110,6 +110,56 @@ void clife_step(clife_t *life) {
     life->board_next = temp_board;
 } /* End clife_step */
 
+update_status clife_step_get_updates(
+    clife_t *life,
+    clife_point_state *state_buff,
+    uint64_t buff_len,
+    uint64_t *update_len
+) {
+    if (state_buff == NULL || !buff_len) {
+        return BUFF_SHORT;
+    }
+    /* Find cells that change state */
+    *update_len = 0;
+    uint16_t neighbourhood_state;
+    size_t cell_offset;
+    bool new_state, old_state;
+    clife_point_state *state_buff_runner = state_buff;
+    for (uint32_t row = 0; row < life->height; row++) {
+        for (uint32_t col = 0; col < life->width; col++) {
+            neighbourhood_state = get_neighbours(life, col, row);
+            cell_offset = col + row*life->width;
+            old_state = *(life->board + cell_offset);
+            new_state = *(life->lookup_table + neighbourhood_state);
+            if (!old_state != !new_state) {
+                if (*update_len > (buff_len - 1)) {
+                    return BUFF_SHORT;
+                }
+                state_buff_runner->state = new_state;
+                state_buff_runner->x=col;
+                state_buff_runner->y=row;
+                state_buff_runner++;
+                (*update_len)++;
+            }
+        }
+    }
+    /* Introduce changes to the board */
+    if (*update_len) {
+        state_buff_runner = state_buff;
+        clife_point_state *state_buff_end = state_buff + *update_len;
+        while (state_buff_runner < state_buff_end) {
+            clife_set_cell(
+                life,
+                state_buff_runner->x,
+                state_buff_runner->y,
+                state_buff_runner->state
+            );
+            state_buff_runner++;
+        }
+    }
+    return OK;
+}
+
 
 /* Getters and setters */
 uint32_t clife_get_width(clife_t *life) {
