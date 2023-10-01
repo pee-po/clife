@@ -195,13 +195,13 @@ bool clife_set_rule(clife_t *life, uint16_t rule_b, uint16_t rule_s) {
 
 
 /* Serialisation */
-size_t clife_serialise(clife_t *life, char *buffer, size_t buff_len) {
+size_t clife_serialise(clife_t *life, uint8_t *buffer, size_t buff_len) {
     uint32_t max_col = life->width - 1;
     size_t copied_cnt = 0;
     bool state;
 
-    char cycler = 7;
-    char acc = 0;
+    uint8_t cycler = 7;
+    uint8_t acc = 0;
     for (uint32_t row = 0; row < life->height; row++) {
         for (uint32_t col = 0; col <= max_col; col++) {
             if (copied_cnt >= buff_len) return 0;
@@ -226,14 +226,14 @@ size_t clife_serialise(clife_t *life, char *buffer, size_t buff_len) {
     return copied_cnt;
 } /* End clife_serialise */
 
-size_t clife_deserialise(clife_t *life, char *buffer, size_t buff_len) {
+size_t clife_deserialise(clife_t *life, uint8_t *buffer, size_t buff_len) {
     size_t bytes_processed = 0;
     uint32_t col = 0;
     uint32_t row = 0;
     bool state;
 
     while (buff_len) {
-        for (char i = 7; i >= 0; i--) {
+        for (int8_t i = 7; i >= 0; i--) {
             /* ternary expresion is to keep bools clean */
             state = *buffer & (1<<i) ? true : false;
             /*

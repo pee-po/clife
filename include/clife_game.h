@@ -156,7 +156,7 @@ bool clife_set_rule(clife_t *life, uint16_t rule_b, uint16_t rule_s);
  * @param[out] size number of bytes written to the buffer. A value of 0
  * indicates that the size of buffer was insufficient.
  */
-size_t clife_serialise(clife_t *life, char *buffer, size_t buff_len);
+size_t clife_serialise(clife_t *life, uint8_t *buffer, size_t buff_len);
 
 /**
  * Deserialise bytestream into life object.
@@ -172,7 +172,7 @@ size_t clife_serialise(clife_t *life, char *buffer, size_t buff_len);
  * safeguard against a situation where the buffer is to small compared to the
  * board and therfore not all cells are set.
  */
-size_t clife_deserialise(clife_t *life, char *buffer, size_t buff_len);
+size_t clife_deserialise(clife_t *life, uint8_t *buffer, size_t buff_len);
 
 #endif /* _clife_game_h_include_ */
 
