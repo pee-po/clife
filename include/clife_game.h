@@ -10,11 +10,11 @@
  */
 typedef struct clife_s clife_t;
 
-typedef struct {
+struct clife_point_state{
     bool state;
     uint32_t x;
     uint32_t y;
-} clife_point_state;
+};
 
 typedef enum {OK, BUFF_SHORT, ERR} update_status;
 
@@ -83,7 +83,7 @@ void clife_step(clife_t *life);
  */
 update_status clife_step_get_updates(
     clife_t *life,
-    clife_point_state *state_buff,
+    struct clife_point_state *state_buff,
     uint64_t buff_len,
     uint64_t *update_len
 );

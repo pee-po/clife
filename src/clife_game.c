@@ -112,7 +112,7 @@ void clife_step(clife_t *life) {
 
 update_status clife_step_get_updates(
     clife_t *life,
-    clife_point_state *state_buff,
+    struct clife_point_state *state_buff,
     uint64_t buff_len,
     uint64_t *update_len
 ) {
@@ -124,7 +124,7 @@ update_status clife_step_get_updates(
     uint16_t neighbourhood_state;
     size_t cell_offset;
     bool new_state, old_state;
-    clife_point_state *state_buff_runner = state_buff;
+    struct clife_point_state *state_buff_runner = state_buff;
     for (uint32_t row = 0; row < life->height; row++) {
         for (uint32_t col = 0; col < life->width; col++) {
             neighbourhood_state = get_neighbours(life, col, row);
@@ -146,7 +146,7 @@ update_status clife_step_get_updates(
     /* Introduce changes to the board */
     if (*update_len) {
         state_buff_runner = state_buff;
-        clife_point_state *state_buff_end = state_buff + *update_len;
+        struct clife_point_state *state_buff_end = state_buff + *update_len;
         while (state_buff_runner < state_buff_end) {
             clife_set_cell(
                 life,
