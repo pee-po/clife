@@ -5,6 +5,7 @@ include_directories(../include)
 add_executable(allocation smoke/allocation.c)
 
 include_directories(../src)
+include_directories(../tests/utils)
 add_executable(serialise unit/serialise.c)
 
 add_test(NAME smoke_allocation COMMAND allocation)
