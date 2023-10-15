@@ -243,7 +243,7 @@ size_t clife_deserialise(clife_t *life, uint8_t *buffer, size_t buff_len) {
              */
             clife_set_cell(life, col, row, state);
             col++;
-            if (col > life->width) {
+            if (col >= life->width) {
                 col = 0;
                 row++;
                 if (row > life->height) {
