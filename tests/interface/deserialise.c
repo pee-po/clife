@@ -22,8 +22,6 @@ int main(int argc, char **argv) {
     if (buffer == NULL) return 1;
 
     clife_deserialise(life, args->bytes, args->num_bytes);
-    delete_clife(life);
-    return 0;
     clife_serialise(life, buffer, args->num_bytes);
 
     int cmp_res = memcmp(buffer, args->bytes, args->num_bytes);
