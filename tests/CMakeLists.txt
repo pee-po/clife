@@ -16,7 +16,9 @@ add_executable(serialise unit/serialise.c)
 # do not need to be changed when internals change, only when interface changes.
 add_executable(deserialise interface/deserialise.c)
 
-add_test(NAME smoke_allocation COMMAND allocation)
+add_test(NAME smoke_allocation_1 COMMAND allocation 3 3)
+add_test(NAME smoke_allocation_2 COMMAND allocation 10 4)
+add_test(NAME smoke_allocation_3 COMMAND allocation 24 31)
 add_test(NAME unit_serialise_1 COMMAND serialise 004000 3 3 1 1)
 add_test(NAME unit_serialise_2 COMMAND serialise 40A040 3 3 1 0 0 1 2 1 1 2)
 add_test(
