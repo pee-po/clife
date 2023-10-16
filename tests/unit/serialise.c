@@ -1,14 +1,8 @@
 #include "clife_game.c"
 #include "test_utils.c"
-#include <stdio.h>
 #include <string.h>
 
 #define BUFF_LEN 1024
-
-/* Compare a buffer as produced by serialisation to a hexstring */
-int compare_byte_hex(uint8_t *byte_buff, char *hex_buff, size_t buff_len);
-/* helper for above */
-uint8_t hex2byte(char *start);
 
 int main(int argc, char **argv) {
     struct parsed_state_args *args = parse_state_args(argc, argv);
@@ -31,6 +25,9 @@ int main(int argc, char **argv) {
     size_t num_bytes = clife_serialise(life, buffer, BUFF_LEN);
     int cmp_res = memcmp(buffer, args->bytes, num_bytes);
     if (num_bytes*2 != strlen(args->hexstr)) return 1;
+    
+    free_state_args(args);
+    delete_clife(life);
 
     return cmp_res;
 }

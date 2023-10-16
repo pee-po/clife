@@ -23,13 +23,16 @@ struct parsed_state_args *parse_state_args(int argc, char **argv) {
     args = malloc(sizeof *args);
     if (args == NULL) exit(2);
 
-    /* Parse hexstring */
-    args->hexstr = argv[1];
+    /* Copy hexstring */
     size_t num_chars = strlen(argv[1]);
-    if (num_chars % 2) {
+    args->hexstr = malloc(sizeof *(args->hexstr) * num_chars + 1);
+    if (num_chars % 2 || args->hexstr == NULL) {
         free_state_args(args);
         exit(3);
     }
+    strncpy(args->hexstr, argv[1], num_chars + 1);
+
+    /* Parse hexstring */
     size_t num_bytes = num_chars / 2;
     uint8_t *bytes;
     bytes = malloc(sizeof *bytes * num_bytes);
