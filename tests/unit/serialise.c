@@ -29,21 +29,8 @@ int main(int argc, char **argv) {
 
     uint8_t buffer[BUFF_LEN];
     size_t num_bytes = clife_serialise(life, buffer, BUFF_LEN);
-    if (num_bytes*2 != strlen(args->expected_hexstr)) return 1;
+    int cmp_res = memcmp(buffer, args->bytes, num_bytes);
+    if (num_bytes*2 != strlen(args->hexstr)) return 1;
 
-    return compare_byte_hex(buffer, args->expected_hexstr, num_bytes);
-}
-
-int compare_byte_hex(uint8_t *byte_buff, char *hex_buff, size_t buff_len) {
-    uint8_t byte_val, hex_val;
-    for (size_t i = 0; i < buff_len; i++) {
-        byte_val = *(byte_buff + i);
-        hex_val = hex2byte(hex_buff);
-        if (hex_val != byte_val) {
-            fprintf(stderr, "@:%lu: %X != %X", i, byte_val, hex_val);
-            return 1;
-        }
-        hex_buff += 2;
-    }
-    return 0;
+    return cmp_res;
 }
