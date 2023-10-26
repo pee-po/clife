@@ -4,11 +4,11 @@
 struct parsed_state_args {
     char *hexstr;
     uint8_t *bytes;
-    uint32_t num_bytes;
     uint32_t width;
     uint32_t height;
     uint32_t *x_arr;
     uint32_t *y_arr;
+    size_t num_bytes;
     size_t num_points;
 };
 
@@ -25,13 +25,11 @@ struct parsed_state_args *parse_state_args(int argc, char **argv) {
     if (args == NULL) exit(2);
 
     /* Copy and parse hexstring */
-    size_t num_bytes;
-    args->bytes = parse_hexstr(argv[1], &num_bytes, &(args->hexstr));
+    args->bytes = parse_hexstr(argv[1], &args->num_bytes, &(args->hexstr));
     if (args->bytes == NULL || args->hexstr == NULL) {
         free_state_args(args);
         exit(4);
     }
-    args->num_bytes = num_bytes;
 
     /* Parse points */
     args->num_points = (argc - 4) / 2;
