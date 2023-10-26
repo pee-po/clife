@@ -15,6 +15,7 @@ struct parsed_state_args {
 /* CLI parsing and cleanup */
 struct parsed_state_args *parse_state_args(int argc, char **argv);
 void free_state_args(struct parsed_state_args *args);
+uint8_t *parse_hexstr(char *hexstr, size_t *num_bytes);
 uint8_t hex2byte(char *start);
 
 struct parsed_state_args *parse_state_args(int argc, char **argv) {
@@ -32,21 +33,12 @@ struct parsed_state_args *parse_state_args(int argc, char **argv) {
     }
     strncpy(args->hexstr, argv[1], num_chars + 1);
 
-    /* Parse hexstring */
-    size_t num_bytes = num_chars / 2;
-    uint8_t *bytes;
-    bytes = malloc(sizeof *bytes * num_bytes);
-    if (bytes == NULL) {
+    size_t num_bytes;
+    args->bytes = parse_hexstr(args->hexstr, &num_bytes);
+    if (args->bytes == NULL) {
         free_state_args(args);
         exit(4);
     }
-    char *c = argv[1];
-    for (size_t i = 0; i < num_bytes; i++) {
-        bytes[i] = hex2byte(c);
-        c += 2;
-    }
-
-    args->bytes = bytes;
     args->num_bytes = num_bytes;
 
     /* Parse points */
@@ -89,6 +81,23 @@ void free_state_args(struct parsed_state_args *args) {
         free(args->y_arr);
         free(args);
     }
+}
+
+uint8_t *parse_hexstr(char *hexstr, size_t *num_bytes) {
+    size_t num_chars = strlen(hexstr);
+    if (num_chars % 2) return NULL;
+    size_t num_bytes_in = num_chars / 2;
+    uint8_t *bytes;
+    bytes = malloc(sizeof *bytes * num_bytes_in);
+    if (bytes == NULL) return NULL;
+
+    char *c = hexstr;
+    for (size_t i = 0; i < num_bytes_in; i++) {
+        bytes[i] = hex2byte(c);
+        c += 2;
+    }
+    if (num_bytes != NULL) *num_bytes = num_bytes_in;
+    return bytes;
 }
 
 uint8_t hex2byte(char *start) {
