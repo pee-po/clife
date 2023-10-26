@@ -17,6 +17,7 @@ add_executable(serialise unit/serialise.c)
 add_executable(set_cell interface/set_cell.c)
 add_executable(get_cell interface/get_cell.c)
 add_executable(deserialise interface/deserialise.c)
+add_executable(step interface/step.c)
 
 add_test(NAME smoke_allocation_1 COMMAND allocation 3 3)
 add_test(NAME smoke_allocation_2 COMMAND allocation 10 4)
@@ -53,3 +54,24 @@ add_test(NAME deserialise_1 COMMAND deserialise 000000 3 3)
 add_test(NAME deserialise_2 COMMAND deserialise 004000 3 3)
 add_test(NAME deserialise_3 COMMAND deserialise 40A040 3 3)
 add_test(NAME deserialise_4 COMMAND deserialise 8040000000008040 10 4)
+
+add_test(NAME step_1 COMMAND step 000000 3 3 000000)
+add_test(NAME step_blinker_1 COMMAND step 00E000 3 3 404040)
+add_test(NAME step_blinker_2 COMMAND step 404040 3 3 00E000)
+add_test(
+    NAME step_fig_eight
+    COMMAND step
+        0000000007000700070038003800380000000000
+        10 10
+        0000020005000880110022004400280010000000
+)
+add_test(
+    NAME step_amoeba_1
+    COMMAND step 104438AA384410 7 7 00442800284400 168 298
+)
+add_test(
+    NAME step_amoeba_2
+    COMMAND step 00442800284400 7 7 00442800284400 168 298
+)
+add_test(NAME step_fail COMMAND step 000000 3 3 FFFFFF)
+set_property(TEST step_fail PROPERTY WILL_FAIL true)
