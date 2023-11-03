@@ -15,6 +15,14 @@ struct parsed_args {
 
 struct parsed_args *parse_args(int argc, char **argv);
 void free_args(struct parsed_args *args);
+int validate_updates(
+    clife_t *life_base, clife_t* life,
+    struct clife_point_state *updates, uint64_t update_len
+);
+struct clife_point_state *find_point_in_updates(
+    uint32_t x, uint32_t y,
+    struct clife_point_state *updates, uint64_t update_len
+);
 
 int main(int argc, char **argv) {
     struct parsed_args *args = parse_args(argc, argv);
@@ -25,12 +33,20 @@ int main(int argc, char **argv) {
     size_t num_bytes = args->num_bytes_1;
 
     /* Set up life and buffer */
-    clife_t *life = new_clife(args->width, args->height);
+    uint32_t w, h;
+    w = args->width;
+    h = args->height;
+    clife_t *life = new_clife(w, h);
+    clife_t *life_cmp = new_clife(w, h);
+    struct clife_point_state *updates;
+    updates = malloc(sizeof *updates * w * h);
     uint8_t *buff;
     buff = malloc(sizeof *buff * num_bytes);
     if (
         buff == NULL
         || life == NULL
+        || life_cmp == NULL
+        || updates == NULL
         || !clife_set_rule(life, args->rule_b, args->rule_s)
     ) {
         free_args(args);
@@ -43,13 +59,24 @@ int main(int argc, char **argv) {
     clife_deserialise(life, args->bytes_1, num_bytes);
     clife_step(life);
     clife_serialise(life, buff, num_bytes);
-    int cmp_res = memcmp(buff, args->bytes_2, num_bytes);
+    int cmp_res_1 = memcmp(buff, args->bytes_2, num_bytes);
+
+    /* Other step fun */
+    clife_deserialise(life, args->bytes_1, num_bytes);
+    clife_deserialise(life_cmp, args->bytes_1, num_bytes);
+    uint64_t update_len;
+    clife_step_get_updates(life, updates, w * h, &update_len);
+    clife_serialise(life, buff, num_bytes);
+    int cmp_res_2 = memcmp(buff, args->bytes_2, num_bytes);
+    if (validate_updates(life_cmp, life, updates, update_len))
+        return 1;
     
     /* Memory */
     free(buff);
     delete_clife(life);
     free_args(args);
-    return cmp_res;
+    if (cmp_res_1 != cmp_res_2) return 1;
+    return cmp_res_1;
 }
 
 struct parsed_args *parse_args(int argc, char **argv) {
@@ -86,4 +113,36 @@ void free_args(struct parsed_args *args) {
         free(args->bytes_2);
         free(args);
     }
+}
+
+int validate_updates(
+    clife_t *life_base, clife_t* life,
+    struct clife_point_state *updates, uint64_t update_len
+) {
+    bool cstate, cstate_cmp, expected_in_update;
+    struct clife_point_state *pt_state;
+    for (uint32_t col = 0; col < clife_get_width(life); col++) {
+        for (uint32_t row = 0; row < clife_get_height(life); row++) {
+            cstate_cmp = clife_get_cell(life_base, col, row);
+            cstate = clife_get_cell(life, col, row);
+            expected_in_update = !cstate_cmp != !cstate;
+            pt_state = find_point_in_updates(col, row, updates, update_len);
+            if (expected_in_update && pt_state == NULL) return 1;
+            if (!expected_in_update && pt_state != NULL) return 1;
+            if (pt_state != NULL && !(pt_state->state) == !cstate_cmp)
+                return 1;
+        }
+    }
+    return 0;
+}
+
+struct clife_point_state *find_point_in_updates(
+    uint32_t x, uint32_t y,
+    struct clife_point_state *updates, uint64_t update_len
+) {
+    for (uint64_t i = 0; i < update_len; i++) {
+        if (updates->x == x && updates->y == y) return updates;
+        updates++;
+    }
+    return NULL;
 }
