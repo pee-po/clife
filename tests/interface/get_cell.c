@@ -1,14 +1,21 @@
 #include "clife_game.h"
 #include "test_utils.c"
 
-#define BUFF_LEN 1024
+/**
+ * Test cell getter
+ * 
+ * Takes state_args (see test_utils.c). Initialises life object according to
+ * hexstr, width and height and checks whether all and only points in
+ * (x_arr, y_arr) are set in life object.
+ */
+int main(int argc, char **argv);
 
+/**
+ * Checks if there exists i < length, such that (x, y) == (x_arr[i], y_arr[i])
+ */
 bool is_point_in_arr(
-    uint32_t x,
-    uint32_t y,
-    uint32_t *x_arr,
-    uint32_t *y_arr,
-    size_t length
+    uint32_t x, uint32_t y,
+    uint32_t *x_arr, uint32_t *y_arr, size_t length
 );
 
 int main(int argc, char **argv) {
@@ -31,7 +38,7 @@ int main(int argc, char **argv) {
         }
     }
     return 0;
-}
+} /* End main */
 
 bool is_point_in_arr(
     uint32_t x,
@@ -44,4 +51,4 @@ bool is_point_in_arr(
         if (*(x_arr + i) == x && *(y_arr + i) == y) return true;
     }
     return false;
-}
+} /* End is_point_in_arr */

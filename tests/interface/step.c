@@ -2,6 +2,16 @@
 #include "test_utils.c"
 #include <string.h>
 
+/*
+ * Type definitions
+ */
+
+ /**
+  * Structure representing parsed life step args
+  * 
+  * Structure representing parsed life step args, for list of arguments,
+  * see parse_args.
+  */
 struct parsed_args {
     uint8_t *bytes_1;
     uint8_t *bytes_2;
@@ -13,17 +23,71 @@ struct parsed_args {
     uint16_t rule_s;
 };
 
+/*
+ * Function prototypes
+ */
+
+/**
+ * Test life step.
+ *
+ * Takes step args (see parsed_args). Allocates and initialises life object
+ * according to bytes_1, width, height, rule_b, rule_s. Then performs a step
+ * and compares deserialised life object to bytes_2. Step is performed twice,
+ * separately: clife_step and clife_step_get_updates. In the latter case,
+ * updates are also tested.
+ */
+int main(int argc, char **argv);
+
+/**
+ * Parse step args
+ * 
+ * Parse CLI args according to the specification:
+ * * Hexstring to deserialise into a life object;
+ * * Number of cells in width to allocate;
+ * * Number of cells in height to allocate;
+ * * Hexstring for comparison after the step;
+ * * Rule_b (optional, default: 8) see clife_set_rule;
+ * * Rule_s (optional, default: 12) see clife_set_rule;
+ */
 struct parsed_args *parse_args(int argc, char **argv);
+
+/**
+ * Free parsed_args
+ * 
+ * @param args pointer to parsed_args to free;
+ */
 void free_args(struct parsed_args *args);
+
+/**
+ * Test array of clife_point_state against life pre and post step.
+ * 
+ * @param[in] life_base Basline life object
+ * @param[in] life Life object equivalent to life_base after a step 
+ * @param[in] updates pointer to array of updates, generated while obtaining
+ * life argument via clife_step_get_updates.
+ * @param[in] update_len length of updates, generated while obtaining life
+ * argument via clife_step_get_updates.
+ * @param[out] int 0 if OK
+ */
 int validate_updates(
     clife_t *life_base, clife_t* life,
     struct clife_point_state *updates, uint64_t update_len
 );
+
+/**
+ * Find point in updates array
+ *
+ * Find such i < update_len, that (x, y) == (updates[i].x, updates[i].y). If
+ * found, return updates + i, else return NULL.
+ */
 struct clife_point_state *find_point_in_updates(
     uint32_t x, uint32_t y,
     struct clife_point_state *updates, uint64_t update_len
 );
 
+/*
+ * Function definitions
+ */
 int main(int argc, char **argv) {
     struct parsed_args *args = parse_args(argc, argv);
     if (args->num_bytes_1 != args->num_bytes_2) {
@@ -77,7 +141,7 @@ int main(int argc, char **argv) {
     free_args(args);
     if (cmp_res_1 != cmp_res_2) return 1;
     return cmp_res_1;
-}
+} /* End main */
 
 struct parsed_args *parse_args(int argc, char **argv) {
     struct parsed_args *args;
@@ -105,7 +169,7 @@ struct parsed_args *parse_args(int argc, char **argv) {
     }
 
     return args;
-}
+} /* End parse_args */
 
 void free_args(struct parsed_args *args) {
     if (args != NULL) {
@@ -113,7 +177,7 @@ void free_args(struct parsed_args *args) {
         free(args->bytes_2);
         free(args);
     }
-}
+} /* End free_args */
 
 int validate_updates(
     clife_t *life_base, clife_t* life,
@@ -134,7 +198,7 @@ int validate_updates(
         }
     }
     return 0;
-}
+} /* End validate_updates */
 
 struct clife_point_state *find_point_in_updates(
     uint32_t x, uint32_t y,
@@ -145,4 +209,4 @@ struct clife_point_state *find_point_in_updates(
         updates++;
     }
     return NULL;
-}
+} /* End find_point_in_updates */
